@@ -19,7 +19,10 @@ app.use(urlencoded({ extended: true }));
 
 // end point base
 import userRouter from "./app/routes/user.routes.js";
+import buyRouter from "./app/routes/buy.routes.js";
+
 app.use("/user", userRouter);
+app.use("/buy", buyRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
