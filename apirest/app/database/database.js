@@ -1,9 +1,11 @@
-import { MONGO_URI } from "../const/const.js";
 import   mongoose    from "mongoose";
+
+import { MONGO_URI } from "../const/const.js";
+console.log(MONGO_URI)
 
 mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
-    useUnidiedTopology: true,
+    useUnifiedTopology: true,
 })
 .catch(err => {
     console.log(`error in db connection: ${err}`);
@@ -15,6 +17,6 @@ connection.on('error', (error) => {
     console.log(error);
 });
 
-connection.once('connected', () => {
+connection.once('open', () => {
     console.log('Database Connected');
 });

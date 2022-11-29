@@ -1,6 +1,6 @@
 import UserModel from "../models/user.model.js"
 
-exports.create = (req, res) => 
+const create = (req, res) =>
 {
     // Agregar validaciones
     // 
@@ -22,7 +22,7 @@ exports.create = (req, res) =>
 };
 
 // Retornar todos los usuarios de la base de datos.
-exports.findAll = (req, res) => 
+const findAll = (req, res) => 
 {
     const name    = req.query.name;
     var condition = name ? { name: name } : {};
@@ -37,7 +37,7 @@ exports.findAll = (req, res) =>
 };
 
 // Buscar un cliente por su id
-exports.findId = (req, res) => 
+const findId = (req, res) => 
 {
     const id = req.params.id;
     UserModel.findById(id)
@@ -53,7 +53,7 @@ exports.findId = (req, res) =>
 };
 
 // actualizar un cliente por su id
-exports.update = (req, res) => 
+const update = (req, res) => 
 {
     // Agregar validaciones
     // 
@@ -71,7 +71,7 @@ exports.update = (req, res) =>
 };
 
 // eliminar un cliente
-exports.deleteOne = (req, res) => 
+const deleteOne = (req, res) => 
 {
     const id = req.params.id;
     UserModel.findByIdAndRemove(id)
@@ -87,7 +87,7 @@ exports.deleteOne = (req, res) =>
 };
 
 // eliminar a todos los usuarios
-exports.deleteAll = (req, res) => 
+const deleteAll = (req, res) => 
 {
     UserModel.deleteMany({})
         .then(data => {
@@ -96,4 +96,8 @@ exports.deleteAll = (req, res) =>
         .catch(err => {
             res.status(500).json({message: "Error"})
         })
+};
+
+export {
+    create, findAll, findId, update, deleteOne, deleteAll
 };

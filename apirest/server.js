@@ -1,4 +1,5 @@
-require('dotenv').config();
+import 'dotenv/config.js'
+
 //Importar dependencias
 import express from "express";
 import cors    from "cors";
@@ -12,7 +13,7 @@ import "./app/database/database.js";
 app.use(cors());
 
 // Analizar las solicitudes de tipo de contenido - application/json
-app.use(json());
+app.use(express.json());
 
 // Analizar las solicitudes de tipo de contenido - application/x-www-form-urlencoded
 app.use(urlencoded({ extended: true }));
