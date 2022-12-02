@@ -1,7 +1,5 @@
 import BuyModel from "../models/buy.model.js"
 
-
-
 exports.create = (req, res) => 
 {
     // Agregar validaciones
@@ -20,198 +18,198 @@ exports.create = (req, res) =>
         })
 };
 
-const isValidPurchased = (purchased) => {
-    return (purchased.id_product && purchased.units);
-}
+// const isValidPurchased = (purchased) => {
+//     return (purchased.id_product && purchased.units);
+// }
 
-const isValidBoughtProducts = (purchasedProds) =>
-{
-    if (purchasedProds.length == 0) return false;
+// const isValidBoughtProducts = (purchasedProds) =>
+// {
+//     if (purchasedProds.length == 0) return false;
     
-    purchasedProds.forEach(purchased => { if (!isValidPurchased(purchased)) return false; });
-    return true;
-}
+//     purchasedProds.forEach(purchased => { if (!isValidPurchased(purchased)) return false; });
+//     return true;
+// }
 
-const isValidBuy = (req) => {
-    return (req.body.date_buy && req.body.total_products && req.body.total_price && req.body.id_client);
-}
+// const isValidBuy = (req) => {
+//     return (req.body.date_buy && req.body.total_products && req.body.total_price && req.body.id_client);
+// }
 
-const isDataValid = (req) => {
-    return (isValidBuy(req) && isValidBoughtProducts(req.body.purchasedProds));
-}
+// const isDataValid = (req) => {
+//     return (isValidBuy(req) && isValidBoughtProducts(req.body.purchasedProds));
+// }
 
-const getInOrderPurchasedProds = (req) =>
-{
-    const size = req.body.purchasedProds.length;
-    const id_products = [], units_prods = [];
+// const getInOrderPurchasedProds = (req) =>
+// {
+//     const size = req.body.purchasedProds.length;
+//     const id_products = [], units_prods = [];
 
-    // Situar los id y unidades apartados pero en misma posicion de indice
-    for (p=0; p<size; ++p) {
-        id_products.push(req.body.purchasedProds[p].id_product);
-        units_prods.push(req.body.purchasedProds[p].units);
-    }
-    return {id_prods: id_products, u_prods: units_prods};
-}
+//     // Situar los id y unidades apartados pero en misma posicion de indice
+//     for (p=0; p<size; ++p) {
+//         id_products.push(req.body.purchasedProds[p].id_product);
+//         units_prods.push(req.body.purchasedProds[p].units);
+//     }
+//     return {id_prods: id_products, u_prods: units_prods};
+// }
 
-const areAllProducts = (products, ids) => 
-{
-    return (products && (products.length == ids.length))?  { value: 200, mess: "areAllProducts: All products found. " }
-    : { value: 404, mess: "areAllProducts: The product(s) were not found. " };
-}
+// const areAllProducts = (products, ids) => 
+// {
+//     return (products && (products.length == ids.length))?  { value: 200, mess: "areAllProducts: All products found. " }
+//     : { value: 404, mess: "areAllProducts: The product(s) were not found. " };
+// }
 
-const availableStock = (products, purchasedProds) =>
-{
-    const size = products.length;
-    for (p=0; p<size; ++p)
-    {
-        const indexOfId = purchasedProds.id_prods.indexOf(products[p].id_product);
-        if (products[p].stock < purchasedProds.u_prods[indexOfId])
-            return { value: 404, mess: "availableStock: Stock not available. " };
-    }
-    return { value: 200, mess: "availableStock: stock available. " };
-}
+// const availableStock = (products, purchasedProds) =>
+// {
+//     const size = products.length;
+//     for (p=0; p<size; ++p)
+//     {
+//         const indexOfId = purchasedProds.id_prods.indexOf(products[p].id_product);
+//         if (products[p].stock < purchasedProds.u_prods[indexOfId])
+//             return { value: 404, mess: "availableStock: Stock not available. " };
+//     }
+//     return { value: 200, mess: "availableStock: stock available. " };
+// }
 
-async function createBuy(req, T)
-{
-    var status = { value: 200, mess: "buy created", id_buy: 0 };
+// async function createBuy(req, T)
+// {
+//     var status = { value: 200, mess: "buy created", id_buy: 0 };
 
-    await Buy.create({                          // Guardar en la base de datos
-        date_buy:       req.body.date_buy,
-        total_products: req.body.total_products,
-        total_price:    req.body.total_price*1.19,
-        id_client:      req.body.id_client
-    }, { transaction: T })
-    .then(buy => {
-        status.id_buy = buy.id_buy;
-    })
-    .catch(err => {
-        status = { value: 500, mess:  err.message + ". " || "createBuy: Error creating a new purchase. " };
-    });
+//     await Buy.create({                          // Guardar en la base de datos
+//         date_buy:       req.body.date_buy,
+//         total_products: req.body.total_products,
+//         total_price:    req.body.total_price*1.19,
+//         id_client:      req.body.id_client
+//     }, { transaction: T })
+//     .then(buy => {
+//         status.id_buy = buy.id_buy;
+//     })
+//     .catch(err => {
+//         status = { value: 500, mess:  err.message + ". " || "createBuy: Error creating a new purchase. " };
+//     });
 
-    return status;
-}
+//     return status;
+// }
 
-async function createPurchasedProducts(purchasedProds, id_buy, T)
-{
-    var status = { value: 200, mess: "Buy and purchased products created. " };
-    var purchaseds = [];
-    //console.log("aca: " + id_buy);
+// async function createPurchasedProducts(purchasedProds, id_buy, T)
+// {
+//     var status = { value: 200, mess: "Buy and purchased products created. " };
+//     var purchaseds = [];
+//     //console.log("aca: " + id_buy);
 
-    purchasedProds.forEach(purchase => {
-        purchaseds.push({
-            units:      purchase.units,
-            id_buy:     id_buy,
-            id_product: purchase.id_product
-        });
-    });
-    // Creacion masiva de productos comprados
-    await db.purchasedProduct.bulkCreate(purchaseds, { transaction: T })
-    .catch(err => {
-        status = { value: 500, mess: err.message + ". " || "createPurchasedProds: Error creating a new products purchased. " };
-    });
+//     purchasedProds.forEach(purchase => {
+//         purchaseds.push({
+//             units:      purchase.units,
+//             id_buy:     id_buy,
+//             id_product: purchase.id_product
+//         });
+//     });
+//     // Creacion masiva de productos comprados
+//     await db.purchasedProduct.bulkCreate(purchaseds, { transaction: T })
+//     .catch(err => {
+//         status = { value: 500, mess: err.message + ". " || "createPurchasedProds: Error creating a new products purchased. " };
+//     });
 
-    return status;
-}
+//     return status;
+// }
 
-async function discountStock(products, purchasedProds, T)
-{
-    var status = { value: 200, mess: "Discounted stock. " };
-    var productsToUpdate = []
-    //console.log(JSON.stringify(products));
+// async function discountStock(products, purchasedProds, T)
+// {
+//     var status = { value: 200, mess: "Discounted stock. " };
+//     var productsToUpdate = []
+//     //console.log(JSON.stringify(products));
     
-    var size = products.length;
-    for (p=0; p<size; ++p)
-    {
-        const indexOfId = purchasedProds.id_prods.indexOf(products[p].id_product);
-        //productsToUpdate.push({ id_product: products[p].id_product, stock:  (products[p].stock - purchasedProds.u_prods[indexOfId]) });
-        await products[p].decrement(['stock'], { by: purchasedProds.u_prods[indexOfId] }, { transaction: T })
-        .then(prod => {
-            //console.log("ojo: " + JSON.stringify(prod));
-        })
-        .catch(err => { 
-            status = { value: 500, mess: err.message + ". " || "discountStock: stock discount error. " };
-        })
-        if (status.value != 200) break;
-    }
+//     var size = products.length;
+//     for (p=0; p<size; ++p)
+//     {
+//         const indexOfId = purchasedProds.id_prods.indexOf(products[p].id_product);
+//         //productsToUpdate.push({ id_product: products[p].id_product, stock:  (products[p].stock - purchasedProds.u_prods[indexOfId]) });
+//         await products[p].decrement(['stock'], { by: purchasedProds.u_prods[indexOfId] }, { transaction: T })
+//         .then(prod => {
+//             //console.log("ojo: " + JSON.stringify(prod));
+//         })
+//         .catch(err => { 
+//             status = { value: 500, mess: err.message + ". " || "discountStock: stock discount error. " };
+//         })
+//         if (status.value != 200) break;
+//     }
 
-    //console.log(productsToUpdate);
-    // await db.product.bulkCreate(productsToUpdate,
-    //     { updateOnDuplicate: ["stock"] }, { transaction: T }
-    // )
-    // .then(products => {
-    //     console.log("CAC");
-    //     console.log(JSON.stringify(products));
-    // }).catch(err => {
-    //     console.log(err);
-    //     status = { value: 500, mess: err.message + ". " || "discountStock: Error updating stock. " };
-    // });
-    return status;
-}
+//     //console.log(productsToUpdate);
+//     // await db.product.bulkCreate(productsToUpdate,
+//     //     { updateOnDuplicate: ["stock"] }, { transaction: T }
+//     // )
+//     // .then(products => {
+//     //     console.log("CAC");
+//     //     console.log(JSON.stringify(products));
+//     // }).catch(err => {
+//     //     console.log(err);
+//     //     status = { value: 500, mess: err.message + ". " || "discountStock: Error updating stock. " };
+//     // });
+//     return status;
+// }
 
-async function destroyBuy(id)
-{
-    var status = { mess: "Purchase removed. " };
+// async function destroyBuy(id)
+// {
+//     var status = { mess: "Purchase removed. " };
 
-    Buy.destroy({ where: { id_buy: id } })
-    .then(num => {
-        if (num != 1) status.mess =  "Purchase not found. "; 
-    })
-    .catch(err => {   status.mess =  "Error removing purchase. " + err.message + ". " ;
-    });
+//     Buy.destroy({ where: { id_buy: id } })
+//     .then(num => {
+//         if (num != 1) status.mess =  "Purchase not found. "; 
+//     })
+//     .catch(err => {   status.mess =  "Error removing purchase. " + err.message + ". " ;
+//     });
 
-    return status;
-}
+//     return status;
+// }
 
-async function createBuyTransaction(req, T)
-{
-    const OKEY           = 200;
-    const purchasedProds = getInOrderPurchasedProds(req);   //console.log(purchasedProds);
-    const Condition      = { id_product: {[Op.or]: purchasedProds.id_prods } };
-    let status, id_buy   = 0;
+// async function createBuyTransaction(req, T)
+// {
+//     const OKEY           = 200;
+//     const purchasedProds = getInOrderPurchasedProds(req);   //console.log(purchasedProds);
+//     const Condition      = { id_product: {[Op.or]: purchasedProds.id_prods } };
+//     let status, id_buy   = 0;
     
-    await db.product.findAll({
-        where: Condition,                   // todos los que su id intersecten en conjunto id_products
-        attributes: ["id_product", "stock"]
-    }, { transaction: T })
-    .then(async products =>             
-    {
-        //console.log(JSON.stringify(products));
-        if ((( status = areAllProducts(products, purchasedProds.id_prods)).value == OKEY ) 
-        && ((  status = availableStock(products, purchasedProds)).value          == OKEY )
-        && ((  status = await createBuy(req, T)).value                           == OKEY ))
-        { 
-            id_buy = status.id_buy;
-            if ((( status = await discountStock(products, purchasedProds, T)).value                  != OKEY )
-            || ((  status = await createPurchasedProducts(req.body.purchasedProds, id_buy, T)).value != OKEY ))
-            {
-                status.mess += (await destroyBuy(id_buy)).mess;
-            }
-        }
-    })
-    .catch(err => {
-        status = { value: 500, mess:  err.message + ". " || "createBuyTransaction: error in searching the product(s). " };
-    })
+//     await db.product.findAll({
+//         where: Condition,                   // todos los que su id intersecten en conjunto id_products
+//         attributes: ["id_product", "stock"]
+//     }, { transaction: T })
+//     .then(async products =>             
+//     {
+//         //console.log(JSON.stringify(products));
+//         if ((( status = areAllProducts(products, purchasedProds.id_prods)).value == OKEY ) 
+//         && ((  status = availableStock(products, purchasedProds)).value          == OKEY )
+//         && ((  status = await createBuy(req, T)).value                           == OKEY ))
+//         { 
+//             id_buy = status.id_buy;
+//             if ((( status = await discountStock(products, purchasedProds, T)).value                  != OKEY )
+//             || ((  status = await createPurchasedProducts(req.body.purchasedProds, id_buy, T)).value != OKEY ))
+//             {
+//                 status.mess += (await destroyBuy(id_buy)).mess;
+//             }
+//         }
+//     })
+//     .catch(err => {
+//         status = { value: 500, mess:  err.message + ". " || "createBuyTransaction: error in searching the product(s). " };
+//     })
         
-    return status;
-}
+//     return status;
+// }
 
 // Crear una nueva compra
-exports.create = async function (req, res)
-{
-    if (!isDataValid(req)){                         // Validar consulta
-        res.status(400).send({ message: "Content can not be empty!. " }); return;
-    }
-    try {
-        const T        = await db.sequelize.transaction(); 
-        const response = await createBuyTransaction(req, T);
-        await T.commit();
-        return res.status(response.value).json({ message: response.mess });
-    } 
-    catch (err){
-        await err.rollback(); 
-        return res.status(500).send({ message: "TransactionError: " + err.message + ". " })
-    }
-};
+// exports.create = async function (req, res)
+// {
+//     if (!isDataValid(req)){                         // Validar consulta
+//         res.status(400).send({ message: "Content can not be empty!. " }); return;
+//     }
+//     try {
+//         const T        = await db.sequelize.transaction(); 
+//         const response = await createBuyTransaction(req, T);
+//         await T.commit();
+//         return res.status(response.value).json({ message: response.mess });
+//     } 
+//     catch (err){
+//         await err.rollback(); 
+//         return res.status(500).send({ message: "TransactionError: " + err.message + ". " })
+//     }
+// };
 
 const filter = (req) =>
 {

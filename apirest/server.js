@@ -3,8 +3,8 @@ import 'dotenv/config.js'
 //Importar dependencias
 import express from "express";
 import cors    from "cors";
-import { json, urlencoded } from 'body-parser';
-const app      = express();
+//import { json, urlencoded } from 'body-parser';
+const app = express();
 
 //DB connection
 import "./app/database/database.js";
@@ -16,14 +16,14 @@ app.use(cors());
 app.use(express.json());
 
 // Analizar las solicitudes de tipo de contenido - application/x-www-form-urlencoded
-app.use(urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 // end point base
 import userRouter from "./app/routes/user.routes.js";
 import buyRouter from "./app/routes/buy.routes.js";
 
 app.use("/user", userRouter);
-app.use("/buy", buyRouter);
+//app.use("/buy", buyRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {

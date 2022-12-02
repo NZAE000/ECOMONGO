@@ -2,8 +2,12 @@ import UserModel from "../models/user.model.js"
 
 const create = (req, res) =>
 {
-    // Agregar validaciones
-    // 
+    // Validar consulta
+    if (!req.body.first_name && !req.body.last_name && !req.body.rut && !req.body.address && !req.body.mail && !req.body.password) {
+        res.status(400).send({ message: "Content can not be empty!" });
+        return;
+    }
+    // instanse a user
     const client = new UserModel({
         firstName: req.body.fisrt_name,
         lasttName: req.body.last_name,
