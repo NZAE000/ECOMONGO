@@ -6,11 +6,11 @@ const BuySchema = new mongoose.Schema({
         required: true,
     },
     totalProducts: {
-        type: String,
+        type: Number,
         required: true,
     },
     totalPrice: {
-        type: String,
+        type: Number,
         required: true,
     }
 })
