@@ -1,7 +1,5 @@
 import   mongoose    from "mongoose";
-
 import { MONGO_URI } from "../const/const.js";
-console.log(MONGO_URI)
 
 mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,

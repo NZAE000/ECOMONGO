@@ -7,6 +7,7 @@ import pkg from 'body-parser';
 const { json, urlencoded } = pkg;
 const app      = express();
 
+
 //DB connection
 import "./app/database/database.js";
 
@@ -17,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // Analizar las solicitudes de tipo de contenido - application/x-www-form-urlencoded
-app.use(urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 // end point base
 import userRouter from "./app/routes/user.routes.js";
