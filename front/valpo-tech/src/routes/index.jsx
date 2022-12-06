@@ -6,9 +6,9 @@ import AllBuys from '../pages/Client/AllBuys/index.jsx';
 const PageRoutes = () => {
   return (
     <Routes>
-        <Route path='/admin/login' component={<Login/>}/>
-        <Route path='/admin/products' component={<Products/>}/>
-        <Route path='/client/allBuys/:rut' component={<AllBuys/>}/>        
+        <Route path='/admin/login' element={<Login/>}/>
+        <Route path='/admin/products' element={<Products/>}/>
+        <Route path='/client/allBuys/:rut' element={<AllBuys/>}/>        
     </Routes>
   )
 }
