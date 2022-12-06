@@ -5,7 +5,7 @@ const getAll = () => {
 };
 
 const get = id_client => {
-  return http.get(`client/${id_client}`);
+  return http.get(`user/${id_client}`);
 };
 const getBuys = rut => {
     return http.get(`client/all-buys?rut=${rut}`);
