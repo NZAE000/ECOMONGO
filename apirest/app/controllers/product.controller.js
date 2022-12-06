@@ -21,6 +21,17 @@ const create = async ( req, res ) => {
     };
 };
 
+const filter = (req) =>
+{
+    const {nameProduct, category, price} = req.query;
+
+    if (category && price && nameProduct) return {$and: [{ category: { $regex: `%${category}%`}}, { price: { $lte : price }}, {nameProduct: { $regex: `%${nameProduct}%`}}]};
+    else if (category && price)    return {$and: [{ category: { $regex: `%${category}%`} }, { price: { $lte : price }}]};
+    else if (nameProduct && price)     return {$and: [{ nameProduct: { $regex: `%${nameProduct}%`}}, { price: { $lte : price }}]};
+    else if (category && nameProduct)     return {$and: [{ category: { $regex: `%${category}%`} }, { nameProduct: { $regex: `%${nameProduct}%`}}]};
+    else
+        return (category || price || nameProduct)? {[Op.or]: [{ category: { $regex: `%${category}%`}}, { price: { $lte : price }}, {nameProduct: { $regex: `%${nameProduct}%`}}]} : null;
+}
 const findId = async ( req, res ) => {
     try {
 
@@ -47,9 +58,9 @@ const findId = async ( req, res ) => {
 };
 
 const findAll = async ( req, res ) => {
-    try {//name
-
-        const products = await ProductModel.find().exec();
+    try {//nameProduct
+        let condition = filter(req)
+        const products = await ProductModel.find({where:condition }).exec();
         return res.status(200).json({
             success: true,
             products: products,
@@ -118,4 +129,4 @@ const deleteAll = async ( req, res ) => {
 
     };
 };
-export { create, findAll, findId, update, deleteOne, deleteAll };
+export { create, findAll, findId, update, deleteOne, deleteAll,filter };
