@@ -7,7 +7,6 @@ exports.create = (req, res) =>
     // Agregar validaciones
     // 
     const buy = new BuyModel({
-        dateBuy: req.body.dateBuy,
         totalProducts: req.body.totalProducts,
         totalPrice:       req.body.totalPrice
     })

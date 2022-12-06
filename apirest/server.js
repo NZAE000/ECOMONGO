@@ -3,7 +3,8 @@ import 'dotenv/config.js'
 //Importar dependencias
 import express from "express";
 import cors    from "cors";
-import { json, urlencoded } from 'body-parser';
+import pkg from 'body-parser';
+const { json, urlencoded } = pkg;
 const app      = express();
 
 //DB connection
@@ -21,9 +22,11 @@ app.use(urlencoded({ extended: true }));
 // end point base
 import userRouter from "./app/routes/user.routes.js";
 import buyRouter from "./app/routes/buy.routes.js";
+import productRouter from "./app/routes/product.routes.js";
 
 app.use("/user", userRouter);
 app.use("/buy", buyRouter);
+app.use("/product", productRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
