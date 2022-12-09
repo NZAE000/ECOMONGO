@@ -64,7 +64,7 @@ const findAll = (req, res) =>
     })
 };
 
-// Buscar un usuario por su id
+// Buscar un usuario por su id rut
 const findId = (req, res) => 
 {
     const id = req.params.rut;
