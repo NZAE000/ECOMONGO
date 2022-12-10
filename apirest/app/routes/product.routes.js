@@ -3,11 +3,11 @@ import { create, findAll, findId, update, deleteOne, deleteAll } from "../contro
 
 const router = Router();
 
-router.route("/create").post(create);
-router.route("/get-all").get(findAll);
-router.route("/get/:id").get(findId);
-router.route("/update/:id").put(update);
-router.route("/delete/:id").delete(deleteOne);
-router.route("/delete-all/").delete(deleteAll);
+router.route("/add").post(create);
+router.route("/all").get(findAll);
+router.route("/:id_prod").get(findId);
+router.route("/:id_prod").put(update);
+router.route("/:id_prod").delete(deleteOne);
+router.route("/").delete(deleteAll);
 
 export default router;
