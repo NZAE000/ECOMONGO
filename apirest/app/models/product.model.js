@@ -32,6 +32,11 @@ const ProductSchema = new mongoose.Schema({
         type: Number,
         required: true,
         trim:true
+    },
+    idProvider: {
+        type: String,
+        required: true,
+        trim:true
     }
 },
 {
