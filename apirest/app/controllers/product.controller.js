@@ -1,12 +1,13 @@
 import ProductModel from "../models/product.model.js"
 
 
-const create = async ( req, res ) => {
+const create = async ( req, res ) => 
+{
     try {
+        if (!req.body.category && !req.body.nameProduct && !req.body.mark && !req.body.price && !req.body.stock && !req.body.idProvider)
+            return res.status(400).send({ message: "Content product can not be empty!" });
 
-        const ProductAttributes = req.body;
-
-        const newProduct = new ProductModel(ProductAttributes);
+        const newProduct = new ProductModel(req.body);
 
         await newProduct.save();
 
@@ -15,8 +16,21 @@ const create = async ( req, res ) => {
             message: 'producto creado',
         });
         
+    } catch ( err ){
+        return res.status(500).json({message: err.message});
+    };
+};
+
+const findAll = async ( req, res ) => 
+{
+    try {
+
+        const products = await ProductModel.find().exec();
+        return res.status(200).json({
+            success: true,
+            products: products,
+        });
     }catch ( error ){
-        console.log(error);
         return error;
     };
 };
@@ -42,19 +56,6 @@ const findId = async ( req, res ) => {
 
     }catch ( error ){
         console.log(error);
-        return error;
-    };
-};
-
-const findAll = async ( req, res ) => {
-    try {//name
-
-        const products = await ProductModel.find().exec();
-        return res.status(200).json({
-            success: true,
-            products: products,
-        });
-    }catch ( error ){
         return error;
     };
 };
