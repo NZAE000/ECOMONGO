@@ -1,24 +1,15 @@
 import UserModel from "../models/user.model.js"
 
+
 const create = (req, res) =>
 {
     // Validar consulta
-    if (!req.body.first_name && !req.body.last_name && !req.body.rut && !req.body.address && !req.body.mail && !req.body.password && !req.body.isAdmin) {
+    if (!req.body.firstName && !req.body.lastName && !req.body.rut && !req.body.address && !req.body.mail && !req.body.password && !req.body.isAdmin) {
         res.status(400).send({ message: "Content can not be empty!" });
         return;
     }
     // instanse a user
-    const client = new UserModel({
-        firstName: req.body.first_name,
-        lastName: req.body.last_name,
-        rut:       req.body.rut,
-        address:   req.body.address,
-        email:     req.body.email,
-        password:  req.body.password,
-        isAdmin:   req.body.isAdmin
-
-    })
-
+    const client = new UserModel(req.body);
     client.save()
     .then(data =>{
         res.status(200).json(data)
@@ -30,14 +21,24 @@ const create = (req, res) =>
 
 const filter = (req) =>
 {
-    const {first, last, adrs} = req.query;
+    const {type, first, last, adrs} = req.query;
+    let userCondition = null;
 
-    if (first && last && adrs) return {$or: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { lastName: { $regex: `${last}`, $options: 'i'}}, { address: { $regex: `${adrs}`, $options: 'i'}}]};
-    else if (first && last) return {$or: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { lastName: { $regex: `${last}`, $options: 'i'}}]};
-    else if (first && adrs) return {$or: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { address: { $regex: `${adrs}`, $options: 'i'}}]};
-    else if (last && adrs) return {$or: [{ lastName: { $regex: `${last}`, $options: 'i'}}, { address: { $regex: `${adrs}`, $options: 'i'}}]};
-    else  
-        return (first || last || adrs)? {$or: [{ firstName: { $regex: `${first}`, $options: 'i'}}, { lastName: { $regex: `${last}`, $options: 'i' }}, { address: { $regex: `${adrs}`, $options: 'i'}}]} : null;
+    if (type){ // si se especifica usuarios solo admins o solo clientes
+        if (type.toLowerCase() == 'a') userCondition = { isAdmin: true  };
+        if (type.toLowerCase() == 'c') userCondition = { isAdmin: false };
+    }
+
+    if (first && last && adrs)  return { $and: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { lastName: { $regex: `${last}`, $options: 'i'}}, { address: { $regex: `${adrs}`, $options: 'i'}}, (userCondition)? userCondition : {}]};
+    else if (first && last)     return { $and: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { lastName: { $regex: `${last}`, $options: 'i'}}, (userCondition)? userCondition : {}]};
+    else if (first && adrs)     return { $and: [{ firstName: { $regex: `${first}`, $options: 'i' }}, { address: { $regex: `${adrs}`, $options: 'i'}}, (userCondition)? userCondition : {}]};
+    else if (last && adrs)      return { $and: [{ lastName: { $regex: `${last}`, $options: 'i'}}, { address: { $regex: `${adrs}`, $options: 'i'}}, (userCondition)? userCondition : {}]};
+    else {
+        if (userCondition)
+            return (first || last || adrs)? { $or: [{ $and: [{firstName: { $regex: `${first}`, $options: 'i'}}, userCondition]}, { $and: [{lastName: { $regex: `${last}`, $options: 'i' }}, userCondition]}, { $and: [{address: { $regex: `${adrs}`, $options: 'i'}}, userCondition]}]} : userCondition;
+        
+        return (first || last || adrs)? { $or: [{ firstName: { $regex: `${first}`, $options: 'i'}}, { lastName: { $regex: `${last}`, $options: 'i' }}, { address: { $regex: `${adrs}`, $options: 'i'}}]} : null;
+    }
 }
 
 // Retornar todos los usuarios de la base de datos.
@@ -54,60 +55,60 @@ const findAll = (req, res) =>
     })
 };
 
-// Buscar un cliente por su id
+// Buscar un usuario por su id rut
 const findId = (req, res) => 
 {
-    const id = req.params.id;
+    const id = req.params.rut;
 
-    UserModel.findById(id, {password: 0})
+    UserModel.findOne({ "rut" : id }, {password: 0})
     .then(data => {
         if (!data)
-            res.status(404).send({ message: "No se encontró cliente con el id " + id });
+            res.status(404).send({ message: "No se encontró usuario con el id " + id });
         else
             res.status(200).json(data)
     })
     .catch(err => {
-        res.status(500).json({message: "Error al buscar cliente"})
+        res.status(500).json({message: "Error al buscar usuario"})
     })
 };
 
-// actualizar un cliente por su id
+// Actualizar un usuario por su id
 const update = (req, res) => 
 {
     // Agregar validaciones
 
-    const id = req.params.id;
+    const id = req.params.rut;
 
-    UserModel.findByIdAndUpdate(id, req.body,{ useFindAndModify: false })
+    UserModel.updateOne({ "rut" : id }, req.body, { useFindAndModify: false })
     .then(data => {
         if (!data)
-            res.status(404).send({ message: "No se encontró cliente con el id " + id });
+            res.status(404).send({ message: "No se encontró usuario con el id " + id });
         else
             res.status(200).json(data)
     })
     .catch(err => {
-        res.status(500).json({message: "Error al buscar cliente"})
+        res.status(500).json({message: "Error al buscar usuario"})
     })
 };
 
-// eliminar un cliente
+// Eliminar un usuario
 const deleteOne = (req, res) => 
 {
-    const id = req.params.id;
+    const id = req.params.rut;
 
-    UserModel.findByIdAndRemove(id)
+    UserModel.deleteOne({ "rut":  id })
     .then(data => {
         if (!data) 
-            res.status(404).send({ message: "No se encontró cliente con el id " + id });
+            res.status(404).send({ message: "No se encontró usuario con el id " + id });
         else 
-            res.status(200).send({ message: "cliente eliminado"})
+            res.status(200).send({ message: "Usuario eliminado"})
     })
     .catch(err => {
-        res.status(500).json({message: "Error al buscar cliente"})
-        })
+        res.status(500).json({message: "Error al buscar usuario"})
+    })
 };
 
-// eliminar a todos los usuarios
+// Eliminar a todos los usuarios
 const deleteAll = (req, res) => 
 {
     UserModel.deleteMany({})
@@ -115,7 +116,7 @@ const deleteAll = (req, res) =>
         res.status(200).send({ message: `${data.deletedCount} usuarios eliminados`})
     })
     .catch(err => {
-        res.status(500).json({message: "Error"})
+        res.status(500).json({message: "Error al eliminar todos los usuarios"})
     })
 };
 

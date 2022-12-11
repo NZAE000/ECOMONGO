@@ -31,6 +31,12 @@ const ProductSchema = new mongoose.Schema({
     stock: {
         type: Number,
         required: true,
+        min: 0,
+        trim:true
+    },
+    idProvider: {
+        type: String,
+        required: true,
         trim:true
     }
 },
