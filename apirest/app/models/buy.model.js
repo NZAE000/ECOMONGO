@@ -10,6 +10,14 @@ const BuySchema = new mongoose.Schema({
         type: Number,
         required: true,
         trim: true
+    },
+    rutClient: {
+        type: String,
+        required: true,
+        trim: true
     }
+},
+{
+    timestamps: true
 })
-export default mongoose.model('Buys', BuySchema)
+export default mongoose.model('Buy', BuySchema)
