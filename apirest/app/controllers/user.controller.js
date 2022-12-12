@@ -79,15 +79,18 @@ const update = (req, res) =>
 
     const id = req.params.rut;
 
-    UserModel.updateOne({ "rut" : id }, req.body, { useFindAndModify: false })
+    UserModel.findOneAndUpdate({ "rut" : id }, req.body, { useFindAndModify: false })
     .then(data => {
         if (!data)
-            res.status(404).send({ message: "No se encontró usuario con el id " + id });
+            return res.status(404).send({ message: "No se encontró usuario con el id " + id });
         else
-            res.status(200).json(data)
+            return res.status(200).json({
+                success: true,
+                message: 'User updated',
+            })
     })
     .catch(err => {
-        res.status(500).json({message: "Error al buscar usuario"})
+        return res.status(500).json({ message: err.message });
     })
 };
 
