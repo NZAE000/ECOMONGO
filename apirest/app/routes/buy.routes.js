@@ -5,9 +5,9 @@ const router = Router();
 
 router.route("/add").post(create);
 router.route("/all").get(findAll);
-router.route("/:id").get(findId);
-router.route("/:id").put(update);
-router.route("/:id").delete(deleteOne);
+router.route("/:id_buy").get(findId);
+router.route("/:id_buy").put(update);
+router.route("/:id_buy").delete(deleteOne);
 router.route("/").delete(deleteAll);
 
 export default router;
