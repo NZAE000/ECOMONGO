@@ -4,12 +4,22 @@ const BuySchema = new mongoose.Schema({
     totalProducts: {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 1
     },
     totalPrice: {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 0
+    },
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
-})
-export default mongoose.model('Buys', BuySchema)
+},
+{
+    timestamps: true
+});
+
+export default mongoose.model('Buy', BuySchema);
