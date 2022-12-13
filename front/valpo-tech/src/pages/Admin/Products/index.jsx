@@ -47,7 +47,8 @@ const Products = () => {
     useEffect(() => {
         ProductService.getAll()
           .then(({ data }) => {
-            setproducts(data);
+            console.log(data.products)
+            setproducts(data.products);
           })
           .catch((error) => {
             console.log(error);
