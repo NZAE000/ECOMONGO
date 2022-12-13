@@ -15,7 +15,8 @@ const BuySchema = new mongoose.Schema({
     },
     client: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        trim: true
     }
 },
 {
