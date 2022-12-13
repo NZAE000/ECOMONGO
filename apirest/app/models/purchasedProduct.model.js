@@ -6,7 +6,20 @@ const PurchasedProductSchema = new mongoose.Schema({
         type: Number,
         required: true,
         trim:true
+    },
+    buy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Buy',
+        trim: true
+    },
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        trim: true
     }
 },
-{    timestaps:true})
-export default mongoose.model('PurshacedProducts', PurchasedProductSchema)
+{    
+    timestaps: true
+});
+
+export default mongoose.model('PurshacedProduct', PurchasedProductSchema);

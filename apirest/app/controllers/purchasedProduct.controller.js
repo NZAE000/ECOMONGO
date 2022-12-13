@@ -1,29 +1,28 @@
 import PurchasedProductModel from "../models/purchasedProduct.model.js"
 
 // Crear un nuevo producto comprado
-exports.create = (req, res) =>
+const create = async(req, res) =>
 {
     // Validar consulta
-    if (!req.body.units && !req.body.id_product && !req.body.id_buy) {
-        res.status(400).send({ message: "Content can not be empty!" });
-        return;
-    }
+    if (!req.body.units && !req.body.product && !req.body.buy)
+        return res.status(400).send({ message: "Content can not be empty!" });
+
     // Create a purchased product
-    const client = new PurchasedProductModel({
-        units:      req.body.units,
-        id_buy:     req.body.id_buy,
-        id_product: req.body.id_product
+    const purchased = new PurchasedProductModel(req.body);
+
+    purchased.save()
+    .then(data =>{
+        return res.status(200).json({
+            success: true,
+            message: "Purchased product created"
+        })
     })
-    Purchased.save()
-        .then(data =>{
-            res.status(200).json(data)
-        })
-        .catch(err => {
-            res.status(500).json({message: err.message})
-        })
+    .catch(err => {
+        return res.status(500).json({message: err.message})
+    })
 };
 
-const filter = (req) =>
+const filter = async(req) =>
 {
     const {name, ctgry} = req.query;
 
@@ -32,95 +31,84 @@ const filter = (req) =>
 }
 
 //Retornar los productos comprados de la base de datos.
-exports.findAll= (req, res) => 
+const findAll = async(req, res) => 
 {
     const condition = filter(req);
 
-    Purchased.findAll({ 
-/*
-        include:[{
-            model: db.product,
-            as: 'product',
-            //required: false,
-            attributes: { exclude:["id_product","createdAt","updatedAt", "id_provider", "stock"] },
-            where: condition
-        }],
-        attributes: { exclude:["updatedAt", "id_product"] }
-*/
-    })
+    PurchasedProductModel.find({},'-__v')
     .then(data => {
-        res.send(data);
+        return res.send(data);
     })
     .catch(err => {
-        res.status(500).send({ message: err.message || "Error en la búsqueda"});
+        return res.status(500).send({ message: err.message || "Search failed."});
     });
 };
 
 // Buscar producto comprado por id
-exports.findOne= (req, res) => 
+const findId = async(req, res) => 
 {
-    const id = req.params;
+    const id = req.params.id_purchased;
 
-    Purchased.findByPk(id,{
-/*
-        include: [{ 
-            model: db.product,
-            as: 'product',
-            required: false,
-            attributes: { exclude:["id_product","createdAt","updatedAt", "id_provider"] }
-        }],
-        attributes: { exclude:["updatedAt", "id_product"] },
-*/
-    })
-
+    PurchasedProductModel.findById(id)
     .then(data => {
-        if (data) res.send(data); // existe el dato? entrega la data
-        else      res.status(404).send({ message: `No se encontró el producto comprado. `});
+        if (data) return res.send(data); // existe el dato? entrega la data
+        else      return res.status(404).send({ message: `The purchased product was not found. `});
     })
     .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error en la búsqueda. "});
+        return res.status(500).send({ message: err.message + ". " || "Search failed. "});
     });
 };
 
 // actualizar un producto comprado por su id
-exports.update= (req, res) => 
+const update = async(req, res) => 
 {
     const id = req.params.id_purchased;
-    Purchased.update(req.body, {  where: { id_purchased: id }})
 
-    .then(num => {
-        if (num == 1) res.send({ message: "Producto comprado actualizado. "});
-        else          res.status(404).send({ message: `No se pudo actualizar el producto comprado. `});
-        
+    UserModel.findOneAndUpdate({ "_id" : id }, req.body, { useFindAndModify: false })
+    .then(data => {
+        if (!data)
+            return res.status(404).send({ message: "No purchased found with id " + id });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Purchased product updated',
+        });
     })
     .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error en actualización. "});
+        return res.status(500).send({ message: err.message + ". " || "Update error. "});
     });
 };
 
 // eliminar un producto comprado
-exports.delete= (req, res) =>
+const deleteOne = async(req, res) =>
 {
     const id = req.params.id_purchased;
-    Purchased.destroy({where: { id_purchased: id }})
-    .then(num => {
-        if (num == 1) res.send({ message: "Producto comprado eliminado" });
-        else          res.status(404).send({ message: `Producto comprado no encontrado. `});     
+
+    PurchasedProductModel.findOneAndDelete(id)
+    .then(data => {
+        if (!data) 
+            return res.status(404).send({ message: "No purchased found with id " + id });
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Product purchased remove.',
+        });
     })
     .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error al eliminar producto comprado. "});
-    });
+        return res.status(500).send({ message: err.message + ". " || "Update error. "});
+    })
 };
 
 // eliminar todos los productos comprados
-exports.deleteAll= (req, res) =>
+const deleteAll = async(req, res) =>
 {
-    const id = req.params.id_purchased;
-    Purchased.destroy({where: {}, truncate: false})
-    .then(nums => {
-       res.send({message: `Productos comprados eliminados! (${nums})`})
+    UserModel.deleteMany({})
+    .then(data => {
+        return res.status(200).send({ message: `${data.deletedCount} purchased products removed.`})
     })
     .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error al eliminar producto comprado. "});
-    });
+        return res.status(500).json({message: "Error deleting all purchased products"});
+    })
 };
+
+export{ create, findAll, findId, update, deleteOne, deleteAll };

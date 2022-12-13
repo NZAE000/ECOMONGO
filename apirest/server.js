@@ -24,10 +24,12 @@ app.use(express.urlencoded({ extended: true }));
 import userRouter from "./app/routes/user.routes.js";
 import buyRouter from "./app/routes/buy.routes.js";
 import productRouter from "./app/routes/product.routes.js";
+import purchasedRouter from "./app/routes/purchasedProduct.routes.js";
 
 app.use("/user", userRouter);
 app.use("/buy", buyRouter);
 app.use("/product", productRouter);
+app.use("/purchased", purchasedRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
