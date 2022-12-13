@@ -1,21 +1,4 @@
-import BuyModel from "../models/buy.model.js"
-
-exports.create = (req, res) => 
-{
-    // Agregar validaciones
-    // 
-    const buy = new BuyModel({
-        totalProducts: req.body.totalProducts,
-        totalPrice:       req.body.totalPrice
-    })
-    buy.save()
-        .then(data =>{
-            res.status(200).json(data)
-        })
-        .catch(err => {
-            res.status(500).json({message: err.message})
-        })
-};
+import BuyModel from "../models/buy.model.js";
 
 // const isValidPurchased = (purchased) => {
 //     return (purchased.id_product && purchased.units);
@@ -210,93 +193,145 @@ exports.create = (req, res) =>
 //     }
 // };
 
+const create = async(req, res) => 
+{
+    // Agregar validaciones
+    // 
+    const buy = new BuyModel({
+        totalProducts: req.body.totalProducts,
+        totalPrice:    req.body.totalPrice*1.19,
+        client:        req.body.idClient
+    });
+
+    buy.save()
+    .then(data =>{
+        return res.status(200).json({
+            success: true,
+            message: 'Buy created',
+        });
+    })
+    .catch(err => {
+        return res.status(500).json({message: err.message});
+    })
+};
+
+// Filtrar compras de un clinte o por fecha, o las dos
 const filter = (req) =>
 {
-    const {id_cl, date} = req.query;
+    const { id_cl, date } = req.query;
 
-    if (id_cl && date) return { [Op.and]: [{ id_client: { [Op.like]: `%${id_cl}%`} }, { date_buy: { [Op.lte]: date} }] };
-    else return (id_cl || date)? { [Op.or]: [{ id_client: { [Op.like]: `%${id_cl}%`} }, { date_buy: { [Op.lte]: date} }] } : null; 
+    if ( id_cl && date ) return { $and: [{ client: id_cl }, { createdAt: { $lte: date} }] };
+    else return (id_cl || date)? { $or: [{ client: id_cl }, { createdAt: { $lte: date} }] } : null; 
 }
 
 // Retornar las compras de la base de datos.
-exports.findAll = (req, res) => 
+const findAll = async(req, res) => 
 {
-    const condition = filter(req);
+    try {
+        const condition    = filter(req);
+        const type         = req.query.typeUser;
+        let adminCondition = false;
 
-    Buy.findAll({ 
-        attributes: {exclude:["createdAt", "updatedAt", "id_client"]},
-        where: condition, 
-        include: [{
-            model: db.client,
-            as: 'buyerClient',
-            attributes: { exclude: ["rut","updatedAt", "createdAt"] },
-            include: [{
-                model: db.user,
-                as: "clientUser",
-                attributes: { exclude: ["direction","password","updatedAt", "createdAt"] }
-            }]
-        }]
-    }) // busca las tuplas que coincida con la condición
-    .then(data => { res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error en la búsqueda. "});
-    });
+        if (type) // si se especifica usuarios solo admins o solo clientes
+            if (type.toLowerCase() == 'a') adminCondition = true;
+
+        const clientQuery = req.query.id_cl;
+        let buys          = null;
+
+        if (clientQuery) 
+            buys = await BuyModel.find(condition, (adminCondition)? '-__v' : '-__v -_id -client -updatedAt').exec()
+        else
+            buys = await BuyModel.find(condition, (adminCondition)? '-__v' : '-__v -_id -updatedAt')
+            .populate({ path: 'client', select: (adminCondition)? '-password -isAdmin -__v' : 'firstName lastName rut -_id'}).exec();
+
+        return res.status(200).json({
+            success: true,
+            buys:    buys
+        });
+
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
 };
 
 // Buscar una compra por su id
-exports.findOne = (req, res) => 
+const findId = async(req, res) => 
 {
-    const id = req.params.id_buy;
-
-    Buy.findByPk(id) // buscar por id
-    .then(data => {
-        if (data) res.send(data); // existe el dato? entrega la data
-        else      res.status(404).send({ message: `No se encontró la compra. `});
-    })
-    .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error en la búsqueda. "});
-    });
+    try {
+        const buy = await BuyModel.findById( req.params.id_buy, '-_id -__v' )
+        .populate({ path: 'client', select: 'firstName lastName rut -_id' }).exec();
+        
+        if(!buy)
+            return res.status(404).json({
+                success: false,
+                error: "Buy not found"
+            });
+        
+        return res.status(200).json({
+            success: true,
+            buy: buy,
+        });
+        
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
 };
 
 // actualizar una compra por su id
-exports.update = (req, res) => 
+const update = async(req, res) => 
 {
-    const id = req.params.id_buy;
-    Buy.update(req.body, {  where: { id_buy: id }})
+    try {
+        const attributes = req.body;  
+       
+        if(!Object.entries(attributes).length)
+            return res.status(404).json({
+                success: false,
+                error: "Buy need some shield to update"
+            });
+    
+        await BuyModel.findByIdAndUpdate(req.params.id_buy, attributes).exec();
 
-    .then(num => {
-        if (num == 1) res.send({ message: "Compra actualizada. "});
-        else          res.status(404).send({ message: `No se pudo actualizar la compra. `});
-        
-    })
-    .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error en actualización. "});
-    });
+        return res.status(200).json({
+            success: true,
+            message: 'Buy updated',
+        });
+
+    } catch ( err ){
+        return res.status(500).json({ message: err.message });
+    };
 };
 
 // eliminar una compra
-exports.delete = (req, res) => 
+const deleteOne = async(req, res) => 
 {
-    const id = req.params.id_buy;
-    Buy.destroy({where: { id_buy: id }})
-    .then(num => {
-        if (num == 1) res.send({ message: "Compra eliminada. " });
-        else          res.status(404).send({ message: `Compra no encontrada. `});     
-    })
-    .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error al eliminar compra. "});
-    });
+    try {
+        const id = req.params.id_buy;
+        const buyDeleted = await BuyModel.findByIdAndDelete(id).exec();
+
+        return (!buyDeleted)? res.status(404).json({
+            success: false,
+            error: "Buy not found to delete"
+        }) 
+        : res.status(200).json({
+            success: true,
+            message: 'Buy removed',
+        });
+        
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
 };
 
 // eliminar todas las compras
-exports.deleteAll = (req, res) => 
+const deleteAll = async(req, res) => 
 {
-    Buy.destroy({ where: {}, truncate: false })
-    .then(nums => {
-        res.send({ message: `${nums} Compras eliminadas!. ` });
+    BuyModel.deleteMany({})
+    .then(data => {
+        res.send({ message: `${data.deletedCount} buys removed!. ` });
     })
     .catch(err => {
-        res.status(500).send({ message: err.message + ". " || "Error al eliminar todas las compras." });
+        res.status(500).send({ message: err.message + ". " || "Error deleting all buys." });
     });
 };
+
+export { create, findAll, findId, update, deleteOne, deleteAll };

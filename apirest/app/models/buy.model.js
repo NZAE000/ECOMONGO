@@ -4,20 +4,22 @@ const BuySchema = new mongoose.Schema({
     totalProducts: {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 1
     },
     totalPrice: {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 0
     },
-    rutClient: {
-        type: String,
-        required: true,
-        trim: true
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 },
 {
     timestamps: true
-})
-export default mongoose.model('Buy', BuySchema)
+});
+
+export default mongoose.model('Buy', BuySchema);
