@@ -150,7 +150,7 @@ const ProductCards = (props) => {
             }
         </ImagesContainer> */}
         <Label>
-            Nombre: {props?.producto?.name_product}
+            Nombre: {props?.producto?.nameProduct}
         </Label>
         <Label>
             Categoria:  {props?.producto?.category}
