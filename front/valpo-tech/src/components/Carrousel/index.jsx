@@ -3,6 +3,7 @@ import { laptopL,laptop,tablet, mobileS, mobileL } from '../../const/screens'
 import styled from 'styled-components'
 import ProductCards from '../Admin/ProductsCards'
 import AllBuysCards from '../Client/AllBuysCards'
+import Clients from '../../pages/Admin/Clients'
 const Container = styled.div`
     width: 90%;
     max-width: 1000px;
@@ -95,7 +96,14 @@ const Carrousel = (props) => {
                                
                             />
                         }
-                        
+                        {
+                            props?.tipo === 'clients' && <Clients 
+                                // indice={index} 
+                                client={data?.clients} 
+                                actualizar={props?.actualizar}
+                               
+                            />
+                        }
                     </ItemUnique>
                 )
             })
